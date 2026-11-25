@@ -1,0 +1,84 @@
+# Calibración de la pantalla principal Entel AS IS (Android). Propuesta generada desde la app real:
+#   levantamiento sobre dispositivo físico Android 14 (1080x2400), app v6.38 (2586).
+# La app es híbrida (OutSystems en WebView): los ids son resource-id del contenido web.
+# El header (b3-*) y el footer (b12-*) son del layout común y probablemente aparecen en otras
+# pantallas; por eso NO se usan en la firma de la pantalla principal (que usa bloques b7-* propios de la pantalla principal).
+#
+# Revisado y aprobado por el usuario (PoC con su propia cuenta).
+module: home-testing
+platform: android
+app_version: "6.38"
+calibrated_by: "fealfaro"
+calibrated_at: "2026-11-19T18:23:34"
+status: reviewed
+
+screens:
+  home:
+    locators:
+      - {strategy: id, value: b7-Container_Carousel_hideondesktoptablet}
+      - {strategy: id, value: b7-Accesso}
+      - {strategy: id, value: b7-Boleta_ID_Tour}
+      - {strategy: id, value: b7-b16-b3-Titulo}
+      - {strategy: id, value: b7-b34-ClubEntel_ID_Tour}
+    min_matches: 3
+    screen_ids: [.MainActivity]
+
+home_component: footer_inicio
+
+components:
+  # --- Header (layout común) ---
+  header:            {locator: {strategy: id, value: b3-Header2}, category: header, required: true}
+  header_perfil:     {locator: {strategy: id, value: b3-HeaderRight}, category: header_action, required: true,
+                      notes: "campana de notificaciones + ícono de perfil"}
+  saludo:            {locator: {strategy: text_contains, value: "¡Hola"}, category: text, required: true,
+                      notes: "no se valida el nombre (dato personal)"}
+  # --- Contenido de la pantalla principal (primer viewport) ---
+  carrusel_banners:  {locator: {strategy: id, value: b7-Container_Carousel_hideondesktoptablet}, category: banner, required: true}
+  accesos_directos:  {locator: {strategy: id, value: b7-Accesso}, category: shortcut, required: true,
+                      notes: "Planes Hogar, Planes Móvil, Equipos y Tecnologia, Cobertura Satelital, Mostrar todos"}
+  boleta:            {locator: {strategy: id, value: b7-Boleta_ID_Tour}, category: card, required: true,
+                      notes: "puede depender del tipo de cliente (postpago)"}
+  boleta_titulo:     {locator: {strategy: id, value: b7-b16-b3-Titulo}, category: text, required: true, expected_text: Boleta}
+  boleta_monto:      {locator: {strategy: id, value: b7-b16-b5-MontoTotal3}, category: text, required: true}
+  boleta_ir:         {locator: {strategy: id, value: b7-b16-b5-Link3}, category: button, required: true, must_be_enabled: true}
+  boleta_pagar:      {locator: {strategy: id, value: b7-b16-b5-Boton3}, category: button, required: true, must_be_enabled: true,
+                      notes: "TRANSACCIONAL: solo se valida presencia; ActionPolicy bloquea el tap"}
+  banner_novedades:  {locator: {strategy: id, value: b7-BannerNovedades}, category: banner, required: true}
+  club_entel:        {locator: {strategy: id, value: b7-b34-ClubEntel_ID_Tour}, category: card, required: true}
+  # --- Contenido bajo el scroll ---
+  administrar_servicios: {locator: {strategy: id, value: b7-Administrar_ID_Tour}, category: card, required: true, scroll_to_find: true,
+                          notes: "Mis planes / Mi número / Administrar mis servicios"}
+  entretencion:      {locator: {strategy: id, value: b7-BannerEntretencion}, category: banner, required: false, scroll_to_find: true}
+  juega_por_premios: {locator: {strategy: text, value: Juega por premios}, category: card, required: false, scroll_to_find: true,
+                      notes: "campaña promocional, puede no estar siempre"}
+  carrusel_ofertas:  {locator: {strategy: id, value: b7-CarouselOPT}, category: banner, required: false, scroll_to_find: true}
+  # --- Footer / navegación inferior (layout común) ---
+  footer:            {locator: {strategy: id, value: b12-Footer2}, category: bottom_nav, required: true}
+  footer_inicio:     {locator: {strategy: id, value: b12-b7-Text}, category: bottom_nav_item, required: true, expected_text: Inicio}
+  footer_mis_planes: {locator: {strategy: id, value: b12-b8-Text}, category: bottom_nav_item, required: true, expected_text: Mis planes}
+  footer_boleta:     {locator: {strategy: id, value: b12-b10-Text}, category: bottom_nav_item, required: true, expected_text: Boleta}
+  footer_ayuda:      {locator: {strategy: id, value: b12-b11-Text}, category: bottom_nav_item, required: true, expected_text: Ayuda}
+  footer_ofertas:    {locator: {strategy: id, value: b12-b12-Text}, category: bottom_nav_item, required: true, expected_text: Ofertas}
+
+# Solo navegación de consulta. Excluidos a propósito: Pagar, Jugar (participación), Explorar
+# (lleva a contratar suscripciones), banners y accesos a planes/equipos (flujos comerciales).
+navigation_targets:
+  - {component: footer_mis_planes, expect: screen_change}
+  - {component: footer_boleta,     expect: screen_change}
+  - {component: footer_ayuda,      expect: screen_change}
+  - {component: footer_ofertas,    expect: screen_change}
+  - {component: boleta_ir,         expect: screen_change}
+
+# Interstitials observados en la app real (2026-11-19). El modal Starlink NO está en el árbol de
+# accesibilidad: se detecta porque oscurece el header y se cierra con su X (punto verificado: tap en
+# (978,780) de 1080x2400 dejó el header con brillo 247, igual que la pantalla principal limpio).
+overlays:
+  - name: modal_starlink
+    detect_dim_region: [0.28, 0.058, 0.55, 0.042]
+    max_brightness: 180
+    dismiss_point: [0.906, 0.325]
+    notes: "Bienvenida Starlink/mensajería satelital; 1 o 2 pasos, la X está en la misma posición"
+
+loading_indicators: []
+error_indicators: []
+login_flow: {}

@@ -1,0 +1,34 @@
+# Perfil de app para mobile-qa-agent. Ficha de tienda obtenida del buscador; ids verificados en dispositivo.
+# session.mode: existing = la cuenta de prueba ya está logueada; manual = un operador inicia sesión;
+# credentials = login automático con login_flow calibrado + QA_USERNAME/QA_PASSWORD.
+id: entel-as-is
+name: Entel
+description: Entel (Entel)
+stores:
+  google_play:
+    id: cl.entel.appswlsdesa
+    title: Entel
+    developer: Entel
+    icon: https://play-lh.googleusercontent.com/6m-kl7YaDsFVUaaUhYJyn8N4UWknaZlw7tcLhR2obyj2_iFxg8XB_nVZgKs3kXvtRgklcoqJ-whrRs8971H92g
+    url: https://play.google.com/store/apps/details?id=cl.entel.appswlsdesa
+    rating: 3.1
+android:
+  package: cl.entel.appswlsdesa
+  package_keywords: []
+  activity: .MainActivity
+  authorized_builds_dir: builds/android
+ios:
+  bundle_keywords: []
+  authorized_builds_dir: builds/ios
+session:
+  mode: existing
+  manual_timeout_s: 300
+  home_timeout_s: 45
+safety:
+  deny_keywords:
+  - contratar plan
+  - mejorar plan
+  - pagar cuenta
+  - pagar boleta
+  - recargar saldo
+  - comprar equipo

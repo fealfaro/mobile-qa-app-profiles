@@ -1,0 +1,94 @@
+# Suite de la pantalla principal de este perfil (basada en templates/suites/home.yaml, ampliada con
+# validaciones propias). Solo lectura e interacciones no transaccionales.
+#   HOME-001: no requiere calibración. HOME-002 a HOME-006: requieren calibration/home-testing.<platform>.yaml.
+id: home
+name: Pantalla principal
+module: home-testing
+cases:
+  - id: HOME-001
+    name: La app abre y queda en primer plano sin crash
+    module: home-testing
+    priority: P1
+    tags: [smoke]
+    preconditions:
+      - App instalada en el dispositivo
+    steps:
+      - {id: S1, action: restart_app, description: Cerrar y abrir la app, params: {settle_s: 6}}
+      - {id: S2, action: capture, description: Captura inicial}
+    expected_results:
+      - La app queda en primer plano y muestra contenido
+    validations:
+      - {id: V1, type: app_installed, description: App instalada y versión identificada, severity: critical}
+      - {id: V2, type: app_in_foreground, description: App en primer plano tras abrir, severity: critical}
+      - {id: V3, type: screen_not_blank, description: La pantalla inicial no está vacía, severity: critical}
+      - {id: V4, type: no_crash, description: Sin crash ni ANR durante el arranque, severity: critical}
+
+  - id: HOME-002
+    name: La pantalla principal se alcanza y termina de cargar
+    module: home-testing
+    priority: P1
+    tags: [smoke]
+    preconditions:
+      - Sesión de cuenta de prueba autorizada disponible (session.mode)
+    steps:
+      - {id: S1, action: ensure_home, description: Llegar a la pantalla principal}
+    validations:
+      - {id: V1, type: home_recognized, description: Firma calibrada de la pantalla principal presente, severity: critical}
+      - {id: V2, type: loading_completes, description: No quedan indicadores de carga, params: {timeout_s: 20}}
+      - {id: V3, type: home_load_time, description: Pantalla principal reconocida en tiempo aceptable, params: {max_s: 15}, severity: minor}
+      - {id: V4, type: no_error_messages, description: Sin mensajes de error visibles}
+      - {id: V5, type: overlays_accessible, description: Modales sobre la pantalla principal expuestos en accesibilidad, severity: minor}
+
+  - id: HOME-003
+    name: Componentes de la pantalla principal identificables por accesibilidad
+    module: home-testing
+    priority: P1
+    steps:
+      - {id: S1, action: ensure_home}
+      - {id: S2, action: explore_home, description: Recorrer la pantalla principal con scroll (solo lectura), params: {max_swipes: 6}}
+    validations:
+      - {id: V1, type: components_identified, description: Se identifican componentes de la pantalla principal, params: {min: 5}}
+      - {id: V2, type: interactive_elements_present, description: Hay elementos interactivos visibles, params: {min: 3, fresh: true}}
+      - {id: V3, type: accessibility_coverage, description: Interactivos con nombre accesible, params: {min_pct: 80}, severity: minor}
+
+  - id: HOME-004
+    name: Componentes requeridos de la pantalla principal presentes
+    module: home-testing
+    priority: P2
+    steps:
+      - {id: S1, action: ensure_home}
+      - {id: S2, action: explore_home, params: {max_swipes: 6}}
+    validations:
+      - {id: V1, type: required_components, description: Todos los componentes required de la calibración están presentes}
+      - {id: V2, type: component_text, target: boleta_titulo, description: El bloque Boleta muestra su título}
+      - {id: V3, type: component_text, target: footer_inicio, description: La navegación inferior muestra "Inicio"}
+      - {id: V4, type: component_enabled, target: boleta_ir, description: '"Ir a boleta" está habilitado'}
+      - {id: V5, type: component_present, target: header, description: Header visible, severity: critical}
+
+  - id: HOME-005
+    name: Navegación desde la pantalla principal responde y vuelve
+    module: home-testing
+    priority: P2
+    steps:
+      - {id: S1, action: ensure_home}
+      - {id: S2, action: navigate_targets, description: Pulsar objetivos autorizados y volver}
+    validations:
+      - {id: V1, type: navigation_responds, description: Cada objetivo autorizado navega y permite volver}
+      - {id: V2, type: no_crash, description: Sin crash durante la navegación, severity: critical}
+
+  - id: HOME-006
+    name: Pantalla principal visualmente consistente con la baseline
+    module: home-testing
+    priority: P3
+    steps:
+      - {id: S1, action: ensure_home}
+      - {id: S2, action: capture, params: {label: home_visual}}
+    validations:
+      - id: V1
+        type: visual_baseline
+        description: Comparación tolerante con la baseline aprobada
+        # ignore_regions [x, y, w, h] en fracciones: carrusel superior auto-rotativo (y 288-715 de 2400)
+        # y banner "Explora lo nuevo" (contenido promocional variable).
+        params: {name: home_top, tolerance: 0.03, fail_threshold: 0.15, top_ignore: 0.05,
+                 ignore_regions: [[0, 0.115, 1, 0.185], [0, 0.685, 1, 0.12]]}
+        severity: minor
